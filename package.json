@@ -1,0 +1,31 @@
+{
+  "name": "cache-us-if-you-can",
+  "version": "1.0.0",
+  "description": "Road Safety & Rule Enforcement Application",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run backend:dev\" \"npm run mobile:dev\"",
+    "backend:dev": "cd backend && npm run dev",
+    "mobile:dev": "cd mobile && expo start",
+    "backend:install": "cd backend && npm install",
+    "mobile:install": "cd mobile && npm install",
+    "install:all": "npm run backend:install && npm run mobile:install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "road-safety",
+    "traffic-violations",
+    "mobile-app",
+    "citizen-reporting",
+    "react-native"
+  ],
+  "author": "CACHE Development Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "workspaces": [
+    "backend",
+    "mobile"
+  ]
+}

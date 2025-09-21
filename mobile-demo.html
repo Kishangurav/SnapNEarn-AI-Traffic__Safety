@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapNEarn - Mobile App Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+            color: #1E293B;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .mobile-container {
+            max-width: 375px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+            position: relative;
+        }
+
+        .header {
+            padding: 60px 20px 20px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .app-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #3B82F6;
+            letter-spacing: 1px;
+        }
+
+        .tagline {
+            font-size: 12px;
+            color: #64748B;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .rider-mode {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .rider-label {
+            font-size: 11px;
+            color: #E8F4FD;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #00E5FF;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+            transition: 0.3s;
+        }
+
+        .welcome-section {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-text {
+            font-size: 24px;
+            font-weight: 300;
+            color: #E8F4FD;
+            margin-bottom: 8px;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00E5FF;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(26, 31, 46, 0.6);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid rgba(0, 229, 255, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #E8F4FD;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6B7B8C;
+            font-weight: 500;
+        }
+
+        .main-button {
+            margin: 0 20px 20px;
+            background: linear-gradient(135deg, #00E5FF 0%, #7C4DFF 100%);
+            border: none;
+            border-radius: 20px;
+            padding: 18px 20px;
+            color: #0B0E1A;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: transform 0.2s;
+        }
+
+        .main-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .detection-modes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 0 20px 20px;
+        }
+
+        .mode-button {
+            background: rgba(26, 31, 46, 0.7);
+            border: 2px solid rgba(0, 229, 255, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-button:hover, .mode-button.active {
+            background: #8b5cf6;
+            border-color: #8b5cf6;
+            color: #fff;
+        }
+
+        .mode-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .mode-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .violations-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 0 20px 20px;
+        }
+
+        .violation-card {
+            background: rgba(26, 31, 46, 0.6);
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .violation-card:hover {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .violation-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .violation-name {
+            font-size: 12px;
+            color: #E8F4FD;
+            font-weight: 600;
+        }
+
+        .ai-features {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            margin: 0 20px 20px;
+        }
+
+        .ai-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00E5FF;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .ai-feature {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 6px;
+            padding-left: 8px;
+        }
+
+        .fraud-button {
+            margin: 0 20px 20px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+            border-radius: 16px;
+            padding: 16px 20px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .demo-note {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid #f59e0b;
+            border-radius: 16px;
+            padding: 16px;
+            margin: 0 20px 30px;
+            text-align: center;
+        }
+
+        .demo-title {
+            color: #f59e0b;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .demo-text {
+            color: #fbbf24;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 375px) {
+            .mobile-container {
+                max-width: 100%;
+            }
+            
+            .app-name {
+                font-size: 24px;
+            }
+            
+            .main-button {
+                font-size: 16px;
+                padding: 16px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <div class="app-name">SnapNEarn</div>
+                <div class="tagline">Report • Verify • Earn</div>
+            </div>
+            <div class="rider-mode">
+                <div class="rider-label">🏍️ Rider Mode</div>
+                <div class="switch" onclick="toggleRiderMode()"></div>
+            </div>
+        </div>
+
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-text">Welcome back!</div>
+            <div class="user-name">Agent Demo User</div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">Reports</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">Verified</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value">₹0</div>
+                <div class="stat-label">Earned</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-value">0.0</div>
+                <div class="stat-label">Rating</div>
+            </div>
+        </div>
+
+        <!-- Main Action Button -->
+        <button class="main-button" onclick="showDetectionModes()">
+            <span>🚨</span>
+            <span>AI-Powered Detection</span>
+        </button>
+
+        <!-- Detection Modes -->
+        <div class="detection-modes hidden" id="detectionModes">
+            <div class="mode-button" onclick="selectMode('photo')">
+                <div class="mode-icon">📸</div>
+                <div class="mode-title">Photo Mode</div>
+            </div>
+            <div class="mode-button" onclick="selectMode('video')">
+                <div class="mode-icon">🎥</div>
+                <div class="mode-title">Video Mode</div>
+            </div>
+        </div>
+
+        <!-- Violations Grid -->
+        <div class="violations-grid">
+            <div class="violation-card" onclick="selectViolation('no_helmet')">
+                <div class="violation-icon">🪖</div>
+                <div class="violation-name">No Helmet</div>
+            </div>
+            <div class="violation-card" onclick="selectViolation('triple_riding')">
+                <div class="violation-icon">👥</div>
+                <div class="violation-name">Triple Riding</div>
+            </div>
+            <div class="violation-card" onclick="selectViolation('red_light')">
+                <div class="violation-icon">🚦</div>
+                <div class="violation-name">Red Light</div>
+            </div>
+            <div class="violation-card" onclick="selectViolation('overspeeding')">
+                <div class="violation-icon">⚡</div>
+                <div class="violation-name">Overspeeding</div>
+            </div>
+            <div class="violation-card" onclick="selectViolation('mobile_use')">
+                <div class="violation-icon">📱</div>
+                <div class="violation-name">Mobile Use</div>
+            </div>
+            <div class="violation-card" onclick="selectViolation('no_license')">
+                <div class="violation-icon">📄</div>
+                <div class="violation-name">No License</div>
+            </div>
+        </div>
+
+        <!-- AI Features -->
+        <div class="ai-features">
+            <div class="ai-title">🤖 AI Features</div>
+            <div class="ai-feature">• Real-time helmet detection</div>
+            <div class="ai-feature">• Person counting for triple riding</div>
+            <div class="ai-feature">• Number plate extraction</div>
+            <div class="ai-feature">• Multi-violation analysis</div>
+            <div class="ai-feature">• Confidence scoring</div>
+            <div class="ai-feature">• Video frame analysis</div>
+        </div>
+
+        <!-- Fraud Button -->
+        <button class="fraud-button" onclick="reportFraud()">
+            <span>🛡️</span>
+            <span>Report Fraud Suspect</span>
+        </button>
+
+        <!-- Demo Note -->
+        <div class="demo-note">
+            <div class="demo-title">📱 React Native Mobile App</div>
+            <div class="demo-text">
+                This is your SnapNEarn mobile app optimized for React Native! All features are working with mobile-responsive design and touch interactions.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let riderMode = true;
+        let detectionVisible = false;
+
+        function toggleRiderMode() {
+            riderMode = !riderMode;
+            const label = document.querySelector('.rider-label');
+            const switchEl = document.querySelector('.switch');
+            
+            if (riderMode) {
+                label.textContent = '🏍️ Rider Mode';
+                switchEl.style.background = '#00E5FF';
+                alert('🏍️ Rider Mode Activated\n\nYour vehicle location will be verified for any challans. You will be notified if any misuse is detected.');
+            } else {
+                label.textContent = '🚗 Non-Rider';
+                switchEl.style.background = '#767577';
+                alert('🚗 Non-Rider Mode\n\nStandard challan payment mode activated.');
+            }
+        }
+
+        function showDetectionModes() {
+            detectionVisible = !detectionVisible;
+            const modes = document.getElementById('detectionModes');
+            modes.classList.toggle('hidden', !detectionVisible);
+        }
+
+        function selectMode(mode) {
+            const buttons = document.querySelectorAll('.mode-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.mode-button').classList.add('active');
+            
+            const modeText = mode === 'photo' ? '📸 Photo' : '🎥 Video';
+            alert(`${modeText} Mode Selected!\n\n🤖 AI Features Active:\n• Helmet Detection\n• Triple Riding Detection\n• Number Plate Recognition\n• Violation Classification\n\nReady to capture and analyze!`);
+        }
+
+        function selectViolation(violation) {
+            const violations = {
+                'no_helmet': { name: 'No Helmet', icon: '🪖', fine: '₹500' },
+                'triple_riding': { name: 'Triple Riding', icon: '👥', fine: '₹1000' },
+                'red_light': { name: 'Red Light', icon: '🚦', fine: '₹1000' },
+                'overspeeding': { name: 'Overspeeding', icon: '⚡', fine: '₹2000' },
+                'mobile_use': { name: 'Mobile Use', icon: '📱', fine: '₹1000' },
+                'no_license': { name: 'No License', icon: '📄', fine: '₹5000' }
+            };
+
+            const data = violations[violation];
+            alert(`${data.icon} ${data.name} Detection\n\n🔍 AI will analyze for:\n• Clear visibility of violation\n• Number plate extraction\n• Confidence scoring\n• Fine: ${data.fine}`);
+        }
+
+        function reportFraud() {
+            alert('🛡️ Fraud Complaint System\n\n📍 Location verification in progress...\n🤖 AI analysis will verify your complaint\n⚖️ Police will review within 24 hours');
+        }
+
+        // Add touch feedback for mobile
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.classList.contains('stat-card') || 
+                e.target.classList.contains('violation-card') ||
+                e.target.classList.contains('mode-button')) {
+                e.target.style.transform = 'scale(0.95)';
+            }
+        });
+
+        document.addEventListener('touchend', function(e) {
+            if (e.target.classList.contains('stat-card') || 
+                e.target.classList.contains('violation-card') ||
+                e.target.classList.contains('mode-button')) {
+                setTimeout(() => {
+                    e.target.style.transform = 'scale(1)';
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>
