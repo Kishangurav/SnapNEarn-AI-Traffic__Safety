@@ -3,8 +3,20 @@ const nodemailer = require('nodemailer');
 
 // Initialize Twilio client (only if credentials are provided)
 let twilioClient = null;
-if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-  twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+try {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID || '';
+  const authToken = process.env.TWILIO_AUTH_TOKEN || '';
+  const isSidValid = typeof accountSid === 'string' && accountSid.startsWith('AC');
+  const isTokenValid = typeof authToken === 'string' && authToken.length > 0;
+
+  if (isSidValid && isTokenValid) {
+    twilioClient = twilio(accountSid, authToken);
+  } else {
+    console.log('ℹ️ Twilio not configured or invalid env vars. SMS will be mocked.');
+  }
+} catch (error) {
+  console.log('ℹ️ Twilio initialization failed, continuing with mock SMS:', error.message);
+  twilioClient = null;
 }
 
 // Initialize email transporter (only if credentials are provided)

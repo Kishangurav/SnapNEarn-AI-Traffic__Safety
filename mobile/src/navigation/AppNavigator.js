@@ -23,7 +23,7 @@ function MainStackNavigator() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#0B0E1A' },
+        cardStyle: { backgroundColor: '#F8FAFC' },
         cardStyleInterpolator: ({ current, layouts }) => {
           return {
             cardStyle: {
@@ -55,7 +55,7 @@ function AuthStackNavigator() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#0B0E1A' },
+        cardStyle: { backgroundColor: '#F8FAFC' },
         cardStyleInterpolator: ({ current, layouts }) => {
           return {
             cardStyle: {

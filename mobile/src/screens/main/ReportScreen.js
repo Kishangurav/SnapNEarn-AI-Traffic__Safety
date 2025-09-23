@@ -114,38 +114,41 @@ export default function ReportScreen({ navigation }) {
     try {
       setIsAnalyzing(true);
 
-      // Convert image to base64
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
-      const reader = new FileReader();
+      // Simulate analysis delay for realistic UX
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      return new Promise((resolve, reject) => {
-        reader.onloadend = async () => {
-          try {
-            const base64data = reader.result;
+      // Mock analysis result - randomly detect violations for demo
+      const hasViolation = Math.random() > 0.6; // 40% chance of violation
 
-            // Call helmet detection API
-            const apiResponse = await fetch('http://localhost:5001/detect/helmet', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                image: base64data
-              })
-            });
+      if (hasViolation) {
+        const violations = ['No Helmet', 'Traffic Signal Violation'];
+        const randomViolation = violations[Math.floor(Math.random() * violations.length)];
 
-            const result = await apiResponse.json();
-            resolve(result);
-          } catch (error) {
-            reject(error);
-          }
+        return {
+          success: true,
+          violations: [randomViolation],
+          estimated_fine: randomViolation === 'No Helmet' ? 500 : 1000,
+          confidence: Math.floor(Math.random() * 20) + 80, // 80-99% confidence
+          message: `Detected: ${randomViolation}`
         };
-        reader.readAsDataURL(blob);
-      });
+      } else {
+        return {
+          success: true,
+          violations: [],
+          estimated_fine: 0,
+          confidence: 95,
+          message: 'No violations detected'
+        };
+      }
     } catch (error) {
       console.error('Analysis failed:', error);
-      throw error;
+      return {
+        success: false,
+        violations: [],
+        estimated_fine: 0,
+        confidence: 0,
+        message: 'Analysis failed'
+      };
     } finally {
       setIsAnalyzing(false);
     }

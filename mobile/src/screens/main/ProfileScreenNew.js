@@ -11,9 +11,10 @@ export default function ProfileScreenNew({ navigation, route }) {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
-  // Get data from route params
-  const { userStats } = route.params || {};
-  const userData = route.params?.user || user || {
+  // Get data from route params with safe defaults
+  const routeParams = route?.params || {};
+  const { userStats = { reports: 0, verified: 0, earned: 0, rating: 0.0 } } = routeParams;
+  const userData = routeParams?.user || user || {
     name: 'Demo User',
     email: 'demo@snapnearn.com',
     age: 25,
