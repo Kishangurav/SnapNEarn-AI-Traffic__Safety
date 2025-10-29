@@ -1,3 +1,6 @@
+// API Configuration
+const API_BASE_URL = 'http://localhost:5000/api';
+
 // Global Variables
 let currentUser = null;
 let userLocation = null;
@@ -842,12 +845,64 @@ function displayAnalysisResults(results) {
     `;
 }
 
-function generateChallan(results) {
+// Save report to MongoDB
+async function saveReportToDatabase(results) {
+    try {
+        const reportData = {
+            violationType: results.helmetDetected ? 'other' : 'no_helmet',
+            description: `${results.violationType} detected via AI analysis. Confidence: ${(results.confidence * 100).toFixed(1)}%`,
+            location: {
+                coordinates: userLocation ? [userLocation.lng, userLocation.lat] : [80.2196, 12.7856],
+                address: userLocation ? userLocation.address : 'Location not available',
+                landmark: nearestPoliceStation ? nearestPoliceStation.name : 'Unknown'
+            },
+            vehicleDetails: {
+                numberPlate: results.numberPlate,
+                vehicleType: 'motorcycle',
+                color: 'Unknown'
+            },
+            photos: results.frameImage ? [results.frameImage] : [],
+            reporterId: currentUser ? currentUser.id : null,
+            isAnonymous: !currentUser
+        };
+
+        console.log('Saving report to MongoDB...', reportData);
+
+        const response = await fetch(`${API_BASE_URL}/reports`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reportData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            console.log('✅ Report saved to MongoDB:', data.data);
+            showSuccess('Report saved to database successfully!');
+            return data.data;
+        } else {
+            console.error('❌ Failed to save report:', data.message);
+            showError('Failed to save report to database');
+            return null;
+        }
+    } catch (error) {
+        console.error('❌ Error saving report to MongoDB:', error);
+        showError('Database connection error. Report saved locally.');
+        return null;
+    }
+}
+
+async function generateChallan(results) {
     if (results.helmetDetected) {
         showSuccess('No violation detected. Thank you for helping keep roads safe!');
         closeUploadModal();
         return;
     }
+    
+    // Save to MongoDB first
+    const savedReport = await saveReportToDatabase(results);
     
     // Close upload modal
     closeUploadModal();
@@ -880,6 +935,19 @@ function generateChallan(results) {
     document.getElementById('selectedFrame').textContent = `#${results.selectedFrameNumber || 1}`;
     document.getElementById('verificationStatus').textContent = `✓ ${results.verificationStatus || 'Verified'}`;
     
+    // Add MongoDB ID if available
+    if (savedReport && savedReport._id) {
+        const mongoInfo = document.createElement('div');
+        mongoInfo.style.cssText = 'background: #e8f5e8; padding: 10px; border-radius: 8px; margin: 10px 0; border-left: 3px solid #28a745;';
+        mongoInfo.innerHTML = `
+            <small style="color: #155724; font-weight: 600;">
+                <i class="fas fa-database"></i>
+                Saved to MongoDB Atlas | ID: ${savedReport._id.substring(0, 8)}...
+            </small>
+        `;
+        successModal.querySelector('.modal-content').appendChild(mongoInfo);
+    }
+    
     successModal.classList.add('active');
     
     // Update user stats
@@ -899,13 +967,14 @@ function generateChallan(results) {
 
     // Add to recent reports
     addToRecentReports({
-        id: Date.now(),
+        id: savedReport ? savedReport._id : Date.now(),
         type: results.violationType,
         vehicleNumber: results.numberPlate,
         fine: results.fineAmount,
         reward: results.rewardAmount,
         timestamp: new Date().toLocaleString(),
-        status: 'Processed'
+        status: 'Processed',
+        mongoId: savedReport ? savedReport._id : null
     });
 
     // Add to rewards history
