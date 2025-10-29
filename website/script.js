@@ -209,7 +209,10 @@ function showDashboard() {
     // Update reward amount in navbar
     updateNavbarRewards();
 
-    // Load recent reports
+    // Clear any default/dummy reports on first load
+    clearDefaultReports();
+
+    // Load recent reports (will show "No reports" if empty)
     loadRecentReports();
 
     // Initialize GPS and find police station
@@ -1030,6 +1033,7 @@ function updateRecentReportsDisplay() {
             <div class="no-reports">
                 <i class="fas fa-clipboard-list"></i>
                 <p>No reports yet. Start by uploading evidence!</p>
+                <p style="color: #999; font-size: 0.9rem; margin-top: 10px;">Upload a violation photo to generate your first report</p>
             </div>
         `;
         return;
@@ -1050,6 +1054,13 @@ function updateRecentReportsDisplay() {
             animation: slideInLeft 0.3s ease;
         `;
 
+        // Add MongoDB ID badge if available
+        const mongoIdBadge = report.mongoId ? `
+            <div style="background: #e8f5e8; color: #155724; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; margin-top: 5px; display: inline-block;">
+                <i class="fas fa-database"></i> DB: ${report.mongoId.substring(0, 8)}...
+            </div>
+        ` : '';
+
         reportItem.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                 <div>
@@ -1058,6 +1069,7 @@ function updateRecentReportsDisplay() {
                         ${report.type}
                     </h4>
                     <p style="color: #666; font-size: 0.9rem;">Vehicle: <strong>${report.vehicleNumber}</strong></p>
+                    ${mongoIdBadge}
                 </div>
                 <div style="text-align: right;">
                     <div style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 5px;">
@@ -1078,6 +1090,28 @@ function updateRecentReportsDisplay() {
 
         reportsContainer.appendChild(reportItem);
     });
+}
+
+// Clear default/dummy reports and rewards
+function clearDefaultReports() {
+    // Clear reports if they don't have MongoDB IDs (dummy data)
+    const savedReports = JSON.parse(localStorage.getItem('snapnearn_recent_reports') || '[]');
+    
+    // Check if reports have MongoDB IDs (real reports) or are dummy data
+    const hasRealReports = savedReports.some(report => report.mongoId || report.id.toString().length > 13);
+    
+    // If no real reports exist, clear the storage
+    if (!hasRealReports && savedReports.length > 0) {
+        localStorage.removeItem('snapnearn_recent_reports');
+        console.log('✓ Cleared default/dummy reports');
+    }
+    
+    // Also clear rewards history if no real reports exist
+    const savedRewards = JSON.parse(localStorage.getItem('snapnearn_rewards') || '[]');
+    if (!hasRealReports && savedRewards.length > 0) {
+        localStorage.removeItem('snapnearn_rewards');
+        console.log('✓ Cleared default/dummy rewards');
+    }
 }
 
 // Load recent reports on dashboard load
