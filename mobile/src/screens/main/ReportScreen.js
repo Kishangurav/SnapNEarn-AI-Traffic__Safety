@@ -79,7 +79,11 @@ export default function ReportScreen({ navigation }) {
           location.longitude
         );
         setNearbyPoliceStations(stations);
-        setSelectedPoliceStation(stations[0]); // Auto-select nearest station
+        if (stations && stations.length > 0) {
+          setSelectedPoliceStation(stations[0]); // Auto-select nearest station
+        } else {
+          setSelectedPoliceStation(null);
+        }
 
         setStep(2);
       }

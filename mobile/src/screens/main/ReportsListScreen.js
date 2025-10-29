@@ -16,29 +16,29 @@ const mockReports = [
   {
     id: '1',
     type: 'No Helmet',
-    location: 'MG Road, Bangalore',
+    location: 'Srirangam, Trichy',
     status: 'verified',
     reward: '₹50',
     date: '2024-01-15',
-    numberPlate: 'KA01AB1234'
+    numberPlate: 'TN48AB1234'
   },
   {
     id: '2',
     type: 'Signal Jump',
-    location: 'Brigade Road, Bangalore',
+    location: 'Chatram Bus Stand, Trichy',
     status: 'under_review',
     reward: '₹0',
     date: '2024-01-14',
-    numberPlate: 'KA02CD5678'
+    numberPlate: 'TN45CD5678'
   },
   {
     id: '3',
     type: 'No Helmet',
-    location: 'Commercial Street, Bangalore',
+    location: 'Big Bazaar Street, Trichy',
     status: 'verified',
     reward: '₹45',
     date: '2024-01-13',
-    numberPlate: 'KA03EF9012'
+    numberPlate: 'TN48EF9012'
   },
 ];
 

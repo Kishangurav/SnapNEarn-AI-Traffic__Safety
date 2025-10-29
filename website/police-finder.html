@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nearby Police Station Finder</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .header p {
+      color: #7f8c8d;
+      font-size: 1.1rem;
+    }
+
+    .location-button {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 20px auto;
+      display: block;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    .location-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(52, 152, 219, 0.4);
+    }
+
+    .location-button:active {
+      transform: translateY(0);
+    }
+
+    .location-button:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .location-info {
+      background: linear-gradient(45deg, #2ecc71, #27ae60);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
+    }
+
+    .location-info h3 {
+      margin-bottom: 10px;
+      font-size: 1.3rem;
+    }
+
+    .coordinates {
+      font-family: 'Courier New', monospace;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+
+    .map-link {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .map-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .stations-section {
+      margin-top: 30px;
+    }
+
+    .stations-title {
+      font-size: 1.5rem;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .stations-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .station-item {
+      background: white;
+      margin: 15px 0;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border-left: 5px solid #3498db;
+    }
+
+    .station-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .station-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    .station-link {
+      color: #3498db;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .station-link:hover {
+      color: #2980b9;
+      text-decoration: underline;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #7f8c8d;
+    }
+
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      background: linear-gradient(45deg, #e74c3c, #c0392b);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .no-stations {
+      background: linear-gradient(45deg, #f39c12, #e67e22);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(52, 152, 219, 0.1);
+      border-radius: 15px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #3498db;
+    }
+
+    .stat-label {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+        padding: 20px;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .stats {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚔 Police Station Finder</h1>
+      <p>Find nearby police stations within 10 km radius</p>
+    </div>
+
+    <button class="location-button" onclick="getLocation()" id="locationBtn">
+      📍 Get My Location
+    </button>
+
+    <div id="location"></div>
+    
+    <div class="stations-section">
+      <h3 class="stations-title">Nearby Police Stations</h3>
+      <ul class="stations-list" id="policeList"></ul>
+    </div>
+  </div>
+
+  <script>
+    let stationCount = 0;
+    let searchRadius = 10000; // 10km in meters
+
+    async function getLocation() {
+      const locationDiv = document.getElementById("location");
+      const policeList = document.getElementById("policeList");
+      const locationBtn = document.getElementById("locationBtn");
+      
+      // Reset UI
+      policeList.innerHTML = "";
+      locationBtn.disabled = true;
+      locationBtn.textContent = "🔄 Getting Location...";
+      
+      locationDiv.innerHTML = '<div class="loading">Getting your location</div>';
+
+      if (!navigator.geolocation) {
+        locationDiv.innerHTML = '<div class="error">❌ Geolocation is not supported by your browser.</div>';
+        locationBtn.disabled = false;
+        locationBtn.textContent = '📍 Get My Location';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const accuracy = pos.coords.accuracy;
+        
+        locationDiv.innerHTML = `
+          <div class="location-info">
+            <h3>✅ Location Found!</h3>
+            <div class="coordinates">
+              <strong>Latitude:</strong> ${lat.toFixed(6)}<br>
+              <strong>Longitude:</strong> ${lon.toFixed(6)}<br>
+              <strong>Accuracy:</strong> ±${Math.round(accuracy)}m
+            </div>
+            <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="map-link">
+              🗺️ Open in Google Maps
+            </a>
+          </div>
+        `;
+
+        // Update button
+        locationBtn.textContent = "🔄 Finding Police Stations...";
+
+        // Overpass API Query
+        const query = `
+          [out:json][timeout:25];
+          (
+            node["amenity"="police"](around:${searchRadius},${lat},${lon});
+            way["amenity"="police"](around:${searchRadius},${lat},${lon});
+            relation["amenity"="police"](around:${searchRadius},${lat},${lon});
+          );
+          out center;
+        `;
+
+        try {
+          const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+          const data = await response.json();
+
+          if (!data.elements || data.elements.length === 0) {
+            policeList.innerHTML = '<div class="no-stations">⚠️ No police stations found within 10 km radius.</div>';
+            locationBtn.disabled = false;
+            locationBtn.textContent = '📍 Get My Location';
+            return;
+          }
+
+          // Process and display stations
+          stationCount = data.elements.length;
+          policeList.innerHTML = "";
+          
+          data.elements.forEach((station, index) => {
+            const name = station.tags?.name || `Police Station ${index + 1}`;
+            const sLat = station.lat || station.center?.lat;
+            const sLon = station.lon || station.center?.lon;
+            
+            if (sLat && sLon) {
+              const distance = calculateDistance(lat, lon, sLat, sLon);
+              const li = document.createElement("li");
+              li.className = "station-item";
+              li.innerHTML = `
+                <div class="station-name">🚔 ${name}</div>
+                <div style="color: #7f8c8d; margin: 5px 0;">
+                  📏 Distance: ${Math.round(distance)}m away
+                </div>
+                <a href="https://www.google.com/maps?q=${sLat},${sLon}" target="_blank" class="station-link">
+                  🗺️ View on Map
+                </a>
+              `;
+              policeList.appendChild(li);
+            }
+          });
+
+          // Add stats
+          const statsDiv = document.createElement("div");
+          statsDiv.className = "stats";
+          statsDiv.innerHTML = `
+            <div class="stat-item">
+              <div class="stat-number">${stationCount}</div>
+              <div class="stat-label">Stations Found</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${Math.round(searchRadius/1000)}</div>
+              <div class="stat-label">Search Radius (km)</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${Math.round(accuracy)}</div>
+              <div class="stat-label">GPS Accuracy (m)</div>
+            </div>
+          `;
+          policeList.parentNode.insertBefore(statsDiv, policeList);
+
+        } catch (error) {
+          policeList.innerHTML = '<div class="error">⚠️ Failed to fetch police stations. Please try again later.</div>';
+          console.error('Error fetching police stations:', error);
+        }
+
+        // Reset button
+        locationBtn.disabled = false;
+        locationBtn.textContent = '📍 Get My Location';
+        
+      }, (err) => {
+        locationDiv.innerHTML = `<div class="error">❌ Location Error: ${err.message}</div>`;
+        locationBtn.disabled = false;
+        locationBtn.textContent = '📍 Get My Location';
+      });
+    }
+
+    // Calculate distance between two coordinates using Haversine formula
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // Earth's radius in meters
+      const φ1 = lat1 * Math.PI / 180;
+      const φ2 = lat2 * Math.PI / 180;
+      const Δφ = (lat2 - lat1) * Math.PI / 180;
+      const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c; // Distance in meters
+    }
+  </script>
+</body>
+</html>

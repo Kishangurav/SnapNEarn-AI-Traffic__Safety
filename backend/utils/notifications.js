@@ -3,20 +3,24 @@ const nodemailer = require('nodemailer');
 
 // Initialize Twilio client (only if credentials are provided)
 let twilioClient = null;
-try {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID || '';
-  const authToken = process.env.TWILIO_AUTH_TOKEN || '';
-  const isSidValid = typeof accountSid === 'string' && accountSid.startsWith('AC');
-  const isTokenValid = typeof authToken === 'string' && authToken.length > 0;
+const hasTwilioCreds =
+  typeof process.env.TWILIO_ACCOUNT_SID === 'string' &&
+  process.env.TWILIO_ACCOUNT_SID.startsWith('AC') &&
+  typeof process.env.TWILIO_AUTH_TOKEN === 'string' &&
+  process.env.TWILIO_AUTH_TOKEN.length > 0;
 
-  if (isSidValid && isTokenValid) {
-    twilioClient = twilio(accountSid, authToken);
-  } else {
-    console.log('ℹ️ Twilio not configured or invalid env vars. SMS will be mocked.');
+if (hasTwilioCreds) {
+  try {
+    twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  } catch (e) {
+    // If initialization fails, keep it disabled to avoid crashing server
+    console.warn('⚠️ Twilio initialization failed, disabling SMS notifications:', e.message);
+    twilioClient = null;
   }
-} catch (error) {
-  console.log('ℹ️ Twilio initialization failed, continuing with mock SMS:', error.message);
-  twilioClient = null;
+} else {
+  if (process.env.TWILIO_ACCOUNT_SID || process.env.TWILIO_AUTH_TOKEN) {
+    console.warn('⚠️ Invalid Twilio credentials detected. SMS will be logged only.');
+  }
 }
 
 // Initialize email transporter (only if credentials are provided)

@@ -1,0 +1,14 @@
+// Website Configuration
+// Copy this file to config.js and replace with your actual API keys
+
+const CONFIG = {
+    // Google Maps API Key
+    // Get from: https://console.cloud.google.com/google/maps-apis
+    // Required APIs: Maps JavaScript API, Places API
+    GOOGLE_MAPS_API_KEY: 'YOUR_GOOGLE_MAPS_API_KEY_HERE'
+};
+
+// Export for use in other scripts
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CONFIG;
+}

@@ -39,10 +39,21 @@ class LocationService {
         throw new Error('Location permission denied');
       }
 
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-        timeout: 10000,
-      });
+      let location = null;
+      try {
+        location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+          timeout: 10000,
+        });
+      } catch (e) {
+        // As a safe fallback, use last known position if available (no fabricated values)
+        const lastKnown = await Location.getLastKnownPositionAsync();
+        if (lastKnown) {
+          location = lastKnown;
+        } else {
+          throw e;
+        }
+      }
 
       this.currentLocation = {
         latitude: location.coords.latitude,
@@ -85,46 +96,63 @@ class LocationService {
     }
   }
 
-  // Find nearby police stations (mock implementation)
-  async findNearbyPoliceStations(latitude, longitude, radius = 5000) {
+  // Find nearby police stations using Overpass API (real data)
+  async findNearbyPoliceStations(latitude, longitude, radius = 10000) {
     try {
-      // Mock police stations data - in real app, this would call a police stations API
-      const mockPoliceStations = [
-        {
-          id: 'ps_001',
-          name: 'MG Road Police Station',
-          address: 'MG Road, Bangalore, Karnataka 560001',
-          phone: '+91-80-22942222',
-          latitude: latitude + 0.01,
-          longitude: longitude + 0.01,
-          distance: 1200,
-        },
-        {
-          id: 'ps_002',
-          name: 'Brigade Road Police Station',
-          address: 'Brigade Road, Bangalore, Karnataka 560025',
-          phone: '+91-80-22943333',
-          latitude: latitude - 0.01,
-          longitude: longitude - 0.01,
-          distance: 1800,
-        },
-        {
-          id: 'ps_003',
-          name: 'Commercial Street Police Station',
-          address: 'Commercial Street, Bangalore, Karnataka 560001',
-          phone: '+91-80-22944444',
-          latitude: latitude + 0.005,
-          longitude: longitude - 0.005,
-          distance: 900,
-        },
-      ];
+      // Overpass API Query for police stations within radius (meters)
+      const query = `
+        [out:json][timeout:25];
+        (
+          node["amenity"="police"](around:${radius},${latitude},${longitude});
+          way["amenity"="police"](around:${radius},${latitude},${longitude});
+          relation["amenity"="police"](around:${radius},${latitude},${longitude});
+        );
+        out center;
+      `;
 
-      // Sort by distance and return closest stations
-      return mockPoliceStations
+      const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.elements || data.elements.length === 0) {
+        // Return an empty list when no real stations are found; do not fabricate
+        return [];
+      }
+
+      const stations = data.elements
+        .filter(element => {
+          const lat = element.lat || element.center?.lat;
+          const lon = element.lon || element.center?.lon;
+          return lat && lon && element.tags?.name;
+        })
+        .map(element => {
+          const lat = element.lat || element.center.lat;
+          const lon = element.lon || element.center.lon;
+          const distance = this.calculateDistance(latitude, longitude, lat, lon);
+
+          return {
+            id: `ps_${element.id || Math.random().toString(36).substr(2, 9)}`,
+            name: element.tags.name || 'Police Station',
+            address: element.tags['addr:full'] || element.tags.address || 'Address not available',
+            phone: element.tags.phone || element.tags['contact:phone'] || 'Phone not available',
+            latitude: lat,
+            longitude: lon,
+            distance: Math.round(distance),
+          };
+        })
         .filter(station => station.distance <= radius)
-        .sort((a, b) => a.distance - b.distance);
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 10); // Limit to 10 closest stations
+
+      return stations;
+
     } catch (error) {
-      console.error('Error finding nearby police stations:', error);
+      console.error('Error fetching real police stations:', error);
+      // On failure, return an empty list; do not generate mock/random data
       return [];
     }
   }

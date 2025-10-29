@@ -11,9 +11,9 @@ router.get('/stations', (req, res) => {
     data: [
       {
         id: 'station-1',
-        name: 'MG Road Police Station',
-        address: 'MG Road, Bangalore',
-        phone: '+91-80-12345678'
+        name: 'Srirangam Police Station',
+        address: 'Srirangam, Trichy, Tamil Nadu',
+        phone: '+91-431-2464100'
       }
     ]
   });
