@@ -1,0 +1,49 @@
+# IMPORTANT: Copy this content to backend/.env file
+
+# Server Configuration
+PORT=5000
+NODE_ENV=development
+
+# MongoDB Atlas Connection
+MONGODB_URI=mongodb+srv://darsanv27:darsan%4027@cluster0.iobtzme.mongodb.net/snapnearn_db?retryWrites=true&w=majority&appName=Cluster0
+
+# JWT Secret (Change this to a secure random string in production!)
+JWT_SECRET=your_super_secret_jwt_key_change_this_in_production_12345
+JWT_EXPIRE=7d
+
+# Cloudinary Configuration (for image storage)
+# Sign up at https://cloudinary.com/ and get your credentials
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# Google Cloud Vision API (Optional - for advanced OCR)
+GOOGLE_CLOUD_PROJECT_ID=your_google_cloud_project_id
+GOOGLE_CLOUD_KEY_FILE=path_to_your_service_account_key.json
+
+# Google Maps API
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+
+# Twilio Configuration (Optional - for SMS notifications)
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=your_twilio_phone_number
+
+# Email Configuration (Optional)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_email_password
+
+# Payment Gateway - Stripe (Optional)
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+
+# Police Station API (Optional)
+POLICE_API_BASE_URL=https://api.police.gov.in
+POLICE_API_KEY=your_police_api_key
+
+# App Configuration
+APP_NAME=SnapNEarn
+APP_URL=http://localhost:5000
+REWARD_PERCENTAGE=10
