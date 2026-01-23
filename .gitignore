@@ -13,8 +13,6 @@ mobile/.env
 **/secrets.json
 **/config/secrets.js
 **/config/keys.js
-website/config.js
-contracts/.env
 
 # Database
 *.db

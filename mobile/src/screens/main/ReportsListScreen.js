@@ -16,7 +16,7 @@ const mockReports = [
   {
     id: '1',
     type: 'No Helmet',
-    location: 'Srirangam, Trichy',
+    location: 'could not fetch ',
     status: 'verified',
     reward: '₹50',
     date: '2024-01-15',
@@ -25,7 +25,7 @@ const mockReports = [
   {
     id: '2',
     type: 'Signal Jump',
-    location: 'Chatram Bus Stand, Trichy',
+    location: 'could not fetch ',
     status: 'under_review',
     reward: '₹0',
     date: '2024-01-14',
@@ -34,7 +34,7 @@ const mockReports = [
   {
     id: '3',
     type: 'No Helmet',
-    location: 'Big Bazaar Street, Trichy',
+    location: 'could not fetch ',
     status: 'verified',
     reward: '₹45',
     date: '2024-01-13',

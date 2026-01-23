@@ -59,34 +59,24 @@ export default function ReportScreen({ navigation }) {
   const handleLocationPermission = async () => {
     setLoading(true);
     try {
-      const location = await locationService.getCurrentLocation();
-      if (location) {
-        setLocationData(location);
-        dispatch(setCurrentLocation(location));
+      // Disabling actual location fetching as per requirement
+      // const location = await locationService.getCurrentLocation();
 
-        // Get address
-        const addressData = await locationService.getAddressFromCoordinates(
-          location.latitude,
-          location.longitude
-        );
-        if (addressData) {
-          dispatch(setAddress(addressData.formattedAddress));
-        }
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-        // Find nearby police stations
-        const stations = await locationService.findNearbyPoliceStations(
-          location.latitude,
-          location.longitude
-        );
-        setNearbyPoliceStations(stations);
-        if (stations && stations.length > 0) {
-          setSelectedPoliceStation(stations[0]); // Auto-select nearest station
-        } else {
-          setSelectedPoliceStation(null);
-        }
+      // Set default failure message
+      const failureMessage = 'could not fetch ';
+      dispatch(setAddress(failureMessage));
+      setLocationData(null); // Ensure no real location data is stored
 
-        setStep(2);
-      }
+      // Clear police stations
+      setNearbyPoliceStations([]);
+      setSelectedPoliceStation(null);
+
+      // Proceed to next step to show the "could not fetch" state
+      setStep(2);
+
     } catch (error) {
       Alert.alert('Location Error', 'Unable to get your location. Please try again.');
     } finally {
