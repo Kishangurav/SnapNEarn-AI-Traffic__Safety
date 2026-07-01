@@ -4,12 +4,10 @@
   "description": "AI-Powered Road Safety & Traffic Violation Detection Application",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"npm run backend:dev\" \"npm run mobile:dev\"",
+    "dev": "cd backend && npm run dev",
     "backend:dev": "cd backend && npm run dev",
-    "mobile:dev": "cd mobile && expo start",
     "backend:install": "cd backend && npm install",
-    "mobile:install": "cd mobile && npm install",
-    "install:all": "npm run backend:install && npm run mobile:install",
+    "install:all": "cd backend && npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -18,9 +16,7 @@
     "road-safety",
     "traffic-violations",
     "helmet-detection",
-    "ocr",
-    "mobile-app",
-    "react-native"
+    "ocr"
   ],
   "author": "CACHE Development Team",
   "license": "MIT",
@@ -28,7 +24,6 @@
     "concurrently": "^7.6.0"
   },
   "workspaces": [
-    "backend",
-    "mobile"
+    "backend"
   ]
 }
