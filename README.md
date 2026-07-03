@@ -15,7 +15,7 @@
 <table align="center">
 <tr>
 <td align="center">
-<b>Home</b><br>
+<b>Login & Signup</b><br>
 <img src="https://github.com/user-attachments/assets/1105f33b-4ed8-478c-8bf1-32824a46e0b2" width="420">
 </td>
 
@@ -27,7 +27,7 @@
 
 <tr>
 <td align="center">
-<b>Police Finder</b><br>
+<b>Police Station Finder</b><br>
 <img src="https://github.com/user-attachments/assets/1f67f817-3003-4684-89e4-6ab61c2ad595" width="420">
 </td>
 
@@ -39,7 +39,7 @@
 
 <tr>
 <td colspan="2" align="center">
-<b>User Dashboard</b><br>
+<b>Home</b><br>
 <img src="https://github.com/user-attachments/assets/e2723ced-f07f-4eb5-9af5-cb1ae30a468d" width="850">
 </td>
 </tr>
