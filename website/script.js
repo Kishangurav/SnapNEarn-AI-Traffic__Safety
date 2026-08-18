@@ -453,17 +453,17 @@ function openUploadModal(type) {
         return;
     }
 
-    if (!nearestPoliceStation) {
-        showError('Please wait for police station connection before uploading evidence.');
-        return;
-    }
-
     const modal = document.getElementById('uploadModal');
     const modalTitle = document.getElementById('modalTitle');
     const fileInput = document.getElementById('fileInput');
 
-    modalTitle.textContent = type === 'photo' ? 'Upload Photo Evidence' : 'Upload Video Evidence';
-    fileInput.accept = type === 'photo' ? 'image/*' : 'video/*';
+    modalTitle.textContent = type === 'photo'
+        ? 'Upload Photo Evidence'
+        : 'Upload Video Evidence';
+
+    fileInput.accept = type === 'photo'
+        ? 'image/*'
+        : 'video/*';
 
     modal.classList.add('active');
     resetUploadModal();
