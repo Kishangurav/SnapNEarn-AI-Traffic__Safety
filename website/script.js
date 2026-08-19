@@ -78,63 +78,111 @@ function togglePassword(inputId) {
 async function handleLogin(e) {
     e.preventDefault();
 
-    const email = document.getElementById('loginEmail').value;
+    const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     const rememberMe = document.getElementById('rememberMe').checked;
 
-    // Show loading
     const submitBtn = e.target.querySelector('.auth-btn');
     const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
+    submitBtn.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
     submitBtn.disabled = true;
 
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Send login request to backend
+        const response = await fetch(
+            'http://localhost:5000/api/auth/login',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    identifier: email,
+                    password: password
+                })
+            }
+        );
 
-        // Create user object
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.message || 'Login failed'
+            );
+        }
+
+        // Make sure this is a normal citizen account
+        if (data.user.role !== 'user') {
+            throw new Error(
+                'Please use the correct citizen account.'
+            );
+        }
+
+        // Store JWT token
+        localStorage.setItem(
+            'snapnearn_token',
+            data.token
+        );
+
+        // Store user information
         currentUser = {
-            id: Date.now(),
-            name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
-            email: email,
-            joinDate: new Date().toISOString(),
-            reports: 0,
-            earnings: 0,
-            rating: 0.0,
+            ...data.user,
+            reports: data.user.totalReports || 0,
+            earnings: data.user.totalEarnings || 0,
+            rating: 0,
             petrolCount: 0
         };
 
-        // Save to localStorage if remember me is checked
         if (rememberMe) {
-            localStorage.setItem('snapnearn_user', JSON.stringify(currentUser));
+            localStorage.setItem(
+                'snapnearn_user',
+                JSON.stringify(currentUser)
+            );
         }
 
-        showSuccess('Login successful! Welcome to SnapNEarn.');
+        showSuccess(
+            'Login successful! Welcome to SnapNEarn.'
+        );
+
         setTimeout(() => {
             showDashboard();
         }, 1000);
 
     } catch (error) {
-        showError('Login failed. Please try again.');
+
+        console.error('Login error:', error);
+
+        showError(
+            error.message ||
+            'Login failed. Please check your credentials.'
+        );
+
     } finally {
+
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
+
     }
 }
 
 async function handleRegister(e) {
     e.preventDefault();
 
-    const name = document.getElementById('registerName').value;
-    const email = document.getElementById('registerEmail').value;
-    const phone = document.getElementById('registerPhone').value;
+    const name = document.getElementById('registerName').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const phone = document.getElementById('registerPhone').value.trim();
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     const agreeTerms = document.getElementById('agreeTerms').checked;
 
-    // Validation
+    const submitBtn = e.target.querySelector('.auth-btn');
+    const originalText = submitBtn.innerHTML;
+
     if (password !== confirmPassword) {
-        showError('Passwords do not match!');
+        showError('Passwords do not match.');
         return;
     }
 
@@ -143,44 +191,86 @@ async function handleRegister(e) {
         return;
     }
 
-    // Show loading
-    const submitBtn = e.target.querySelector('.auth-btn');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+    submitBtn.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+
     submitBtn.disabled = true;
 
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Create user object
+        const response = await fetch(
+            'http://localhost:5000/api/auth/register',
+            {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    password: password
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.message || 'Registration failed'
+            );
+        }
+
+        // Save JWT returned by backend
+        localStorage.setItem(
+            'snapnearn_token',
+            data.token
+        );
+
+        // Save user information
         currentUser = {
-            id: Date.now(),
-            name: name,
-            email: email,
-            phone: phone,
-            joinDate: new Date().toISOString(),
+            ...data.user,
             reports: 0,
             earnings: 0,
-            rating: 0.0,
+            rating: 0,
             petrolCount: 0
         };
 
-        localStorage.setItem('snapnearn_user', JSON.stringify(currentUser));
+        localStorage.setItem(
+            'snapnearn_user',
+            JSON.stringify(currentUser)
+        );
 
-        showSuccess('Account created successfully! Welcome to SnapNEarn.');
+        showSuccess(
+            'Account created successfully! Welcome to SnapNEarn.'
+        );
+
         setTimeout(() => {
             showDashboard();
         }, 1000);
 
     } catch (error) {
-        showError('Registration failed. Please try again.');
+
+        console.error(
+            'Registration error:',
+            error
+        );
+
+        showError(
+            error.message ||
+            'Registration failed. Please try again.'
+        );
+
     } finally {
+
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
+
     }
 }
-
 function logout() {
     localStorage.removeItem('snapnearn_user');
     currentUser = null;
@@ -798,83 +888,341 @@ function displayAnalysisResults(results) {
     `;
 }
 
-function generateChallan(results) {
+async function generateChallan(results) {
+
+    // If there is NO violation, don't create a challan/report
     if (results.helmetDetected) {
-        showSuccess('No violation detected. Thank you for helping keep roads safe!');
+        showSuccess(
+            'No violation detected. Thank you for helping keep roads safe!'
+        );
         closeUploadModal();
         return;
     }
 
-    // Close upload modal
-    closeUploadModal();
+    // ============================================
+    // SAVE REPORT TO MONGODB
+    // ============================================
 
-    // Show success modal with challan details
-    const successModal = document.getElementById('successModal');
-    document.getElementById('violationType').textContent = results.violationType;
-    document.getElementById('vehicleNumber').textContent = results.numberPlate;
-    document.getElementById('fineAmount').textContent = `₹${results.fineAmount}`;
-    document.getElementById('rewardAmount').textContent = `₹${results.rewardAmount}`;
+    try {
+        const token = localStorage.getItem('snapnearn_token');
 
-    // Set timestamp
-    document.getElementById('violationTimestamp').textContent = results.timestamp || new Date().toLocaleString();
+        if (!token) {
+            console.warn('No authentication token found. Report not saved.');
+            showError('Please login again before submitting a report.');
+            return;
+        }
 
-    // Set AI Score
-    document.getElementById('aiScore').textContent = `${results.aiScore || '90.0'}%`;
+        // Your GPS object uses lat/lng
+        const latitude = Number(userLocation?.lat);
+        const longitude = Number(userLocation?.lng);
 
-    // Set violation image if available
-    const violationImage = document.getElementById('violationImage');
-    if (results.frameImage) {
-        violationImage.src = results.frameImage;
-        violationImage.style.display = 'block';
-    } else {
-        violationImage.style.display = 'none';
+        if (
+            !Number.isFinite(latitude) ||
+            !Number.isFinite(longitude)
+        ) {
+            console.error(
+                'Invalid GPS coordinates:',
+                userLocation
+            );
+
+            showError(
+                'Unable to get your GPS location. Please enable location access and try again.'
+            );
+
+            return;
+        }
+
+        console.log('📍 GPS coordinates:', {
+            latitude,
+            longitude
+        });
+
+        // ============================================
+        // REPORT DATA
+        // ============================================
+
+        const reportData = {
+            violationType:
+                results.violationType === 'No Helmet'
+                    ? 'no_helmet'
+                    : 'other',
+
+            description:
+                `Traffic violation detected: ${results.violationType}`,
+
+            location: {
+                type: 'Point',
+
+                // MongoDB GeoJSON = [longitude, latitude]
+                coordinates: [
+                    longitude,
+                    latitude
+                ],
+
+                address:
+                    nearestPoliceStation?.address ||
+                    'Location not available',
+
+                landmark:
+                    nearestPoliceStation?.name ||
+                    ''
+            },
+
+            photos: results.frameImage
+                ? [{
+                    public_id: `evidence_${Date.now()}`,
+                    url: results.frameImage
+                }]
+                : [],
+
+            vehicleDetails: {
+                numberPlate:
+                    results.numberPlate ||
+                    'NO NUMBERPLATE DETECTED',
+
+                vehicleType: 'motorcycle'
+            },
+
+            priority: 'medium',
+
+            isAnonymous: false,
+
+            aiAnalysis: {
+                numberPlateConfidence:
+                    results.plateConfidence || 0,
+
+                violationConfidence:
+                    results.confidence || 0,
+
+                imageQualityScore:
+                    results.aiScore
+                        ? parseFloat(results.aiScore)
+                        : 0,
+
+                processedAt:
+                    new Date()
+            }
+        };
+
+        console.log('📤 Sending report to MongoDB...');
+
+        // ============================================
+        // POST TO BACKEND
+        // ============================================
+
+        const response = await fetch(
+            'http://localhost:5000/api/reports',
+            {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json',
+
+                    'Authorization':
+                        `Bearer ${token}`
+                },
+
+                body: JSON.stringify(reportData)
+            }
+        );
+
+        const data = await response.json();
+
+        // ============================================
+        // HANDLE RESPONSE
+        // ============================================
+
+        if (!response.ok || !data.success) {
+
+            console.error(
+                '❌ Failed to save report:',
+                data
+            );
+
+            showError(
+                data.message ||
+                'Failed to save report to server.'
+            );
+
+            return;
+        }
+
+        console.log(
+            '✅ Report saved to MongoDB:',
+            data.data
+        );
+
+        showSuccess(
+            'Report successfully submitted!'
+        );
+
+    } catch (error) {
+
+        console.error(
+            '❌ MongoDB report save error:',
+            error
+        );
+
+        showError(
+            'Unable to submit report. Please try again.'
+        );
+
+        return;
     }
 
-    // Set verification statistics
-    document.getElementById('totalFrames').textContent = results.totalFramesAnalyzed || uploadedFiles.length || 20;
-    document.getElementById('framesAnalyzed').textContent = results.framesUsedForAI || 3;
-    document.getElementById('selectedFrame').textContent = `#${results.selectedFrameNumber || 1}`;
-    document.getElementById('verificationStatus').textContent = `✓ ${results.verificationStatus || 'Verified'}`;
+    // ============================================
+    // SHOW CHALLAN
+    // ============================================
+
+    closeUploadModal();
+
+    const successModal =
+        document.getElementById('successModal');
+
+    document.getElementById('violationType').textContent =
+        results.violationType;
+
+    document.getElementById('vehicleNumber').textContent =
+        results.numberPlate;
+
+    document.getElementById('fineAmount').textContent =
+        `₹${results.fineAmount}`;
+
+    document.getElementById('rewardAmount').textContent =
+        `₹${results.rewardAmount}`;
+
+    // Timestamp
+    document.getElementById(
+        'violationTimestamp'
+    ).textContent =
+        results.timestamp ||
+        new Date().toLocaleString();
+
+    // AI score
+    document.getElementById(
+        'aiScore'
+    ).textContent =
+        `${results.aiScore || '90.0'}%`;
+
+    // Violation image
+    const violationImage =
+        document.getElementById('violationImage');
+
+    if (results.frameImage) {
+        violationImage.src =
+            results.frameImage;
+
+        violationImage.style.display =
+            'block';
+    } else {
+        violationImage.style.display =
+            'none';
+    }
+
+    // Verification statistics
+    document.getElementById(
+        'totalFrames'
+    ).textContent =
+        results.totalFramesAnalyzed ||
+        uploadedFiles.length ||
+        20;
+
+    document.getElementById(
+        'framesAnalyzed'
+    ).textContent =
+        results.framesUsedForAI ||
+        3;
+
+    document.getElementById(
+        'selectedFrame'
+    ).textContent =
+        `#${results.selectedFrameNumber || 1}`;
+
+    document.getElementById(
+        'verificationStatus'
+    ).textContent =
+        `✓ ${results.verificationStatus || 'Verified'}`;
 
     successModal.classList.add('active');
 
-    // Update user stats
-    currentUser.reports = (currentUser.reports || 0) + 1;
-    currentUser.earnings = (currentUser.earnings || 0) + results.rewardAmount;
-    // Convert rating to number first, then add and format
-    const currentRating = parseFloat(currentUser.rating) || 0;
-    currentUser.rating = parseFloat((currentRating + 0.1).toFixed(1));
-    // Update petrol count (0-5 cycle)
-    currentUser.petrolCount = ((currentUser.petrolCount || 0) + 1) % 6; // 0-5, resets to 0 at 6
+    // ============================================
+    // UPDATE USER STATS
+    // ============================================
 
-    // Save updated user data
-    localStorage.setItem('snapnearn_user', JSON.stringify(currentUser));
+    currentUser.reports =
+        (currentUser.reports || 0) + 1;
 
-    // Update navbar rewards
+    currentUser.earnings =
+        (currentUser.earnings || 0) +
+        results.rewardAmount;
+
+    const currentRating =
+        parseFloat(currentUser.rating) || 0;
+
+    currentUser.rating =
+        parseFloat(
+            (currentRating + 0.1).toFixed(1)
+        );
+
+    currentUser.petrolCount =
+        ((currentUser.petrolCount || 0) + 1) % 6;
+
+    localStorage.setItem(
+        'snapnearn_user',
+        JSON.stringify(currentUser)
+    );
+
     updateNavbarRewards();
 
-    // Add to recent reports
+    // ============================================
+    // RECENT REPORT
+    // ============================================
+
     addToRecentReports({
         id: Date.now(),
-        type: results.violationType,
-        vehicleNumber: results.numberPlate,
-        fine: results.fineAmount,
-        reward: results.rewardAmount,
-        timestamp: new Date().toLocaleString(),
-        status: 'Processed'
+
+        type:
+            results.violationType,
+
+        vehicleNumber:
+            results.numberPlate,
+
+        fine:
+            results.fineAmount,
+
+        reward:
+            results.rewardAmount,
+
+        timestamp:
+            new Date().toLocaleString(),
+
+        status:
+            'Processed'
     });
 
-    // Add to rewards history
+    // ============================================
+    // REWARD HISTORY
+    // ============================================
+
     addToRewardsHistory({
         id: Date.now(),
-        type: results.violationType,
-        amount: results.rewardAmount,
-        vehicleNumber: results.numberPlate,
-        timestamp: new Date().toLocaleString(),
-        status: 'Credited'
+
+        type:
+            results.violationType,
+
+        amount:
+            results.rewardAmount,
+
+        vehicleNumber:
+            results.numberPlate,
+
+        timestamp:
+            new Date().toLocaleString(),
+
+        status:
+            'Credited'
     });
 }
-
 function closeSuccessModal() {
     document.getElementById('successModal').classList.remove('active');
 
