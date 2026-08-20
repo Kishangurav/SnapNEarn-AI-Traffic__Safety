@@ -93,7 +93,7 @@ async function handleLogin(e) {
     try {
         // Send login request to backend
         const response = await fetch(
-            'http://localhost:5000/api/auth/login',
+            'https://snapnearn-backend.onrender.com/api/auth/login',
             {
                 method: 'POST',
                 headers: {
@@ -199,7 +199,7 @@ async function handleRegister(e) {
     try {
 
         const response = await fetch(
-            'http://localhost:5000/api/auth/register',
+            'https://snapnearn-backend.onrender.com/api/auth/register',
             {
                 method: 'POST',
 
@@ -1011,7 +1011,7 @@ async function generateChallan(results) {
         // ============================================
 
         const response = await fetch(
-            'http://localhost:5000/api/reports',
+            'https://snapnearn-backend.onrender.com/api/reports',
             {
                 method: 'POST',
 
@@ -2426,3 +2426,5 @@ document.addEventListener('DOMContentLoaded', () => {
     if (stopBtn) stopBtn.addEventListener('click', stopVideoCapture);
     if (saveBtn) saveBtn.addEventListener('click', saveCapturedVideo);
 });
+
+
