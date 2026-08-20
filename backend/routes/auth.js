@@ -135,7 +135,21 @@ router.post('/login', [
     }
 
     // Check password
+console.log('LOGIN DEBUG:', {
+  email: user.email,
+  role: user.role,
+  passwordExists: !!user.password
+});
     const isPasswordMatch = await user.comparePassword(password);
+console.log('PASSWORD MATCH:', isPasswordMatch);
+
+if (!isPasswordMatch) {
+  return res.status(401).json({
+    success: false,
+    message: 'Invalid credentials'
+  });
+}
+
     if (!isPasswordMatch) {
       return res.status(401).json({
         success: false,

@@ -25,5 +25,8 @@
   },
   "workspaces": [
     "backend"
-  ]
+  ],
+  "dependencies": {
+    "mongodb": "^7.5.0"
+  }
 }
