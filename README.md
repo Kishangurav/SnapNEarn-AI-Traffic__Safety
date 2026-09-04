@@ -162,3 +162,5 @@ website/index.html
 ## 📄 License
 
 This project is intended for educational and research purposes.
+
+Testing GitHub collaboration
