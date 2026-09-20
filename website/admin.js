@@ -1,4 +1,4 @@
-const API_URL = 'https://snapnearn-backend.onrender.com/api';
+const API_URL = 'https://snapnearn-backend-kishan.onrender.com/api';
 
 let adminToken = null;
 let reports = [];
