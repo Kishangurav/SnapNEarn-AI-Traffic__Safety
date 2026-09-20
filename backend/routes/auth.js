@@ -83,13 +83,14 @@ router.post('/register', [
       }
     });
 
-  } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during registration'
-    });
-  }
+} catch (error) {
+  console.error('Login error:', error);
+
+  res.status(500).json({
+    success: false,
+    message: error.message
+  });
+}
 });
 
 // @route   POST /api/auth/login
