@@ -9,7 +9,11 @@
 </p>
 
 ---
+## 🌐 Live Demo
 
+Try SnapNEarn here:
+
+👉 [**Launch SnapNEarn Live Demo**](https://snapnearn-ai-traffic-safety.onrender.com)
 ## 📸 Application Preview
 
 <table align="center">
